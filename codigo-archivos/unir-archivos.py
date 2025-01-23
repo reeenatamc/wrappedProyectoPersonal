@@ -1,28 +1,38 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import json
-import os #interactuar con el sistema operativo
+import os
+import pandas as pd
 
-carpeta_archivos = r"C:/Users/LENOVO/Documents/GitHub/wrappedProyectoPersonal/codigo-archivos"
+carpeta_archivos = r"C:/Users/LENOVO/Documents/GitHub/wrappedProyectoPersonal/archivos"  
 
-all_data = [] # arreglo para guardar los archivos
+all_data = []  
 
 for filename in os.listdir(carpeta_archivos):
-    if filename.endswith(".json"):
-        file_path = os.path.join(carpeta_archivos, filename) #solo hace una ruta y por lo tanto asegura que sea valida
+    if filename.endswith(".json"):  
+        file_path = os.path.join(carpeta_archivos, filename)  
+        print(f"Procesando archivo: {file_path}")
         
-        # Leer el contenido del archivo JSON
         with open(file_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            all_data.extend(data)  
+            try:
+                data = json.load(file)  
+                print(f"Registros leídos del archivo {filename}: {len(data)}")  
+                all_data.extend(data)  
+            except json.JSONDecodeError as e:
+                print(f"Error al leer el archivo {filename}: {e}")
+            except Exception as e:
+                print(f"Error inesperado con el archivo {filename}: {e}")
+
 
 
 df = pd.DataFrame(all_data)
 
-# Eliminar duplicados exactos
+print(f"Total de registros cargados: {len(df)}")
+
 df_unique = df.drop_duplicates()
 
-# Ver el número de registros únicos
 print(f"Total de registros únicos: {len(df_unique)}")
+
+output_file_json = "archivos/datos_unidos.json"
+df_unique.to_json(output_file_json, orient='records', lines=True, force_ascii=False)
+
+print(f"Datos guardados en {output_file_json}")
+
